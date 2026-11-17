@@ -1,0 +1,23 @@
+name: merge-test
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        required: true
+jobs:
+  m:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ vars.SHA }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [ "$MODE" = merges ]; then
+            gh api -X POST repos/${{ github.repository }}/merges -f base=uat -f head=$SHA && echo RESULT=merged || echo RESULT=blocked
+          else
+            gh api -X PUT repos/${{ github.repository }}/pulls/1/merge && echo RESULT=merged || echo RESULT=blocked
+          fi
